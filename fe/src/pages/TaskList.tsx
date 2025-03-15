@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../utils/axios-config';
 
 interface Task {
   _id: string;
@@ -17,7 +17,7 @@ const TaskList: React.FC = () => {
   useEffect(() => {
     const fetchTasks = async () => {
       try {
-        const response = await axios.get('/api/tasks');
+        const response = await api.get('/api/tasks');
         setTasks(response.data);
         setLoading(false);
       } catch (error) {
@@ -31,7 +31,7 @@ const TaskList: React.FC = () => {
 
   const handleCreateTask = async () => {
     try {
-      const response = await axios.post('/api/tasks', { name: 'New Task' });
+      const response = await api.post('/api/tasks', { name: 'New Task' });
       navigate(`/${response.data._id}`);
     } catch (error) {
       console.error('Error creating task:', error);
