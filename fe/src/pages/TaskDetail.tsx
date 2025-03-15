@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../utils/axios-config';
 
 interface Task {
   _id: string;
@@ -33,7 +33,7 @@ const TaskDetail: React.FC = () => {
     const fetchTask = async () => {
       try {
         if (taskId) {
-          const response = await axios.get(`/api/tasks/${taskId}`);
+          const response = await api.get(`/api/tasks/${taskId}`);
           setTask(response.data);
           setFormData({
             name: response.data.name || '',
@@ -66,7 +66,7 @@ const TaskDetail: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await axios.put(`/api/tasks/${taskId}`, formData);
+      await api.put(`/api/tasks/${taskId}`, formData);
       alert('Task configuration saved successfully!');
     } catch (error) {
       console.error('Error updating task:', error);
@@ -76,10 +76,10 @@ const TaskDetail: React.FC = () => {
 
   const handleStartTask = async () => {
     try {
-      await axios.post(`/api/tasks/${taskId}/start`);
+      await api.post(`/api/tasks/${taskId}/start`);
       alert('Task started successfully!');
       // Refresh the task data
-      const response = await axios.get(`/api/tasks/${taskId}`);
+      const response = await api.get(`/api/tasks/${taskId}`);
       setTask(response.data);
     } catch (error) {
       console.error('Error starting task:', error);
@@ -90,7 +90,7 @@ const TaskDetail: React.FC = () => {
   const handleDelete = async () => {
     if (window.confirm('Are you sure you want to delete this task?')) {
       try {
-        await axios.delete(`/api/tasks/${taskId}`);
+        await api.delete(`/api/tasks/${taskId}`);
         navigate('/');
       } catch (error) {
         console.error('Error deleting task:', error);
