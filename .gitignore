@@ -179,3 +179,4 @@ fe/build/
 fe/dist/
 fe/coverage/
 
+**/.DS_Store
