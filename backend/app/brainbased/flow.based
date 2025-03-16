@@ -21,14 +21,14 @@ until "User responds with yes":
 
 loop:
     q1_response = talk("How much has your English improved because of this class at RIT?" ",True)
-until "User has provided a rating between 1 to 5":
+until "User has responded to the question":
     q1_rating = q1_response.ask(question="Based on the user's response, what rating would you give from 1 to 5?",example={"rating": 4})
 
 state["english_improved_rating"] = q1_rating["rating"]
 
 loop:
     q2_response = talk("How confident do you feel using English in your daily life now compared to before you joined the program?",True)
-until "User has provided a rating between 1 to 5":
+until "User has responded to the question":
     q2_rating = q2_response.ask(question="Based on the user's response, what rating would you give from 1 to 5?",example={"rating": 4})
 state["confidence_rating"] = q2_rating["rating"]
 
