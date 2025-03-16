@@ -5,8 +5,8 @@ loop:
     name_response = talk(f"{meta_prompt}. Thank the user for calling  RIT survey center.  Asks for the caller's first and last name",True)
 until "User has provided full name":
     user_info = name_response.ask(
-        question="Extract the user's full name.",
-        example={"full_name": "John Doe"}
+        question="Extract the user's first and last name.",
+        example={"first_name": "John", "last_name": "Doe"}
     )
 
 state["user_info"] = user_info
@@ -34,5 +34,7 @@ loop:
 until "user has provided some feebacks":
     q3_answer = q3_response.ask(question="Extract the user's feedback about what RIT can do to help them.",example={"feedback": "I would like more conversation practice and evening classes."})
 state["improvement_suggestions"] = q3_answer["feedback"]
+api.post_req(url='https://c777-136-24-163-114.ngrok-free.app/api/surveys', data=state)
 
 res = say("Thank you very much for taking the time to provide your feedback. Your input will help us improve the English program at RIT. Have a great day!")
+
