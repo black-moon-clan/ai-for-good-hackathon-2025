@@ -33,6 +33,7 @@ interface Questionnaire {
   title: string;
   questions: Question[];
   created_at: string;
+  status: 'Not Started' | 'Running' | 'Stopped' | 'Complete';
 }
 
 const QuestionnaireList: React.FC = () => {
@@ -129,9 +130,28 @@ const QuestionnaireList: React.FC = () => {
                   <Typography variant="h6" gutterBottom>
                     {questionnaire.title}
                   </Typography>
-                  <Typography color="text.secondary" gutterBottom>
-                    Created: {new Date(questionnaire.created_at).toLocaleDateString()}
-                  </Typography>
+                  <Box display="flex" justifyContent="space-between" alignItems="center">
+                    <Typography color="text.secondary" gutterBottom>
+                      Created: {new Date(questionnaire.created_at).toLocaleDateString()}
+                    </Typography>
+                    <Typography
+                      sx={{
+                        px: 2,
+                        py: 0.5,
+                        borderRadius: 1,
+                        backgroundColor: (() => {
+                          switch (questionnaire.status) {
+                            case 'Running': return 'success.light';
+                            case 'Stopped': return 'warning.light';
+                            case 'Complete': return 'info.light';
+                            default: return 'grey.200';
+                          }
+                        })(),
+                      }}
+                    >
+                      {questionnaire.status}
+                    </Typography>
+                  </Box>
                   <Typography variant="body2">
                     Number of questions: {questionnaire.questions.length}
                   </Typography>

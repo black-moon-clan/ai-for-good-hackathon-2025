@@ -20,6 +20,7 @@ interface QuestionnaireFormProps {
     id: string;
     title: string;
     questions: Question[];
+    status?: string;
   };
   onComplete?: () => void;
 }
@@ -81,6 +82,7 @@ const QuestionnaireForm: React.FC<QuestionnaireFormProps> = ({
         body: JSON.stringify({
           title,
           questions,
+          status: initialData?.status || 'Not Started',
         }),
       });
 

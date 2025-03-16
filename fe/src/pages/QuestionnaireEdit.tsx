@@ -20,6 +20,7 @@ interface Questionnaire {
   title: string;
   questions: Question[];
   created_at: string;
+  status: 'Not Started' | 'Running' | 'Stopped' | 'Complete';
 }
 
 const QuestionnaireEdit: React.FC = () => {
@@ -58,8 +59,32 @@ const QuestionnaireEdit: React.FC = () => {
   };
 
   const handleStart = async () => {
-    // Add your logic to start the questionnaire here
-    alert('Questionnaire started!');
+    if (!questionnaire) return;
+
+    const newStatus = questionnaire.status === 'Running' ? 'Stopped' : 'Running';
+    
+    try {
+      const response = await fetch(`http://localhost:5000/api/questionnaires/${id}/status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update questionnaire status');
+      }
+
+      if (newStatus === 'Running') {
+        navigate('/');
+      } else {
+        const updatedQuestionnaire = await response.json();
+        setQuestionnaire(updatedQuestionnaire);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    }
   };
 
   if (loading) {
@@ -109,12 +134,14 @@ const QuestionnaireEdit: React.FC = () => {
         </Button>
         <Button
           variant="contained"
-          color="primary"
+          color={questionnaire?.status === 'Running' ? 'error' : 'primary'}
           onClick={handleStart}
           disabled={isNewQuestionnaire}
-          sx={{ opacity: isNewQuestionnaire ? 0.6 : 1 }}
+          sx={{ 
+            opacity: isNewQuestionnaire ? 0.6 : 1,
+          }}
         >
-          Start Questionnaire
+          {questionnaire?.status === 'Running' ? 'Stop Questionnaire' : 'Start Questionnaire'}
         </Button>
       </Stack>
     </Box>

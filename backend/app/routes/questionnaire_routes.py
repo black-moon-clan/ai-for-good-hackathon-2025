@@ -50,4 +50,18 @@ def delete_questionnaire(questionnaire_id):
     questionnaires = [q for q in questionnaires if q['id'] != questionnaire_id]
     if len(questionnaires) < initial_length:
         return jsonify({"message": "Questionnaire deleted successfully"}), 200
-    return jsonify({"error": "Questionnaire not found"}), 404 
+    return jsonify({"error": "Questionnaire not found"}), 404
+
+@questionnaire_bp.route('/<questionnaire_id>/status', methods=['PUT'])
+def update_status(questionnaire_id):
+    try:
+        data = request.get_json()
+        new_status = data.get('status')
+        index = next((i for i, q in enumerate(questionnaires) if q['id'] == questionnaire_id), None)
+        
+        if index is not None:
+            questionnaires[index]['status'] = new_status
+            return jsonify(questionnaires[index]), 200
+        return jsonify({"error": "Questionnaire not found"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400 
