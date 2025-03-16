@@ -172,3 +172,13 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# fe
+fe/node_modules/
+fe/build/
+fe/dist/
+fe/coverage/
+
+**/.DS_Store
+# backend
+backend/config
