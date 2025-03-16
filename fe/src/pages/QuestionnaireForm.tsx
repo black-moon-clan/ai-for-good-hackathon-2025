@@ -30,7 +30,9 @@ const QuestionnaireForm: React.FC<QuestionnaireFormProps> = ({
   onComplete 
 }) => {
   const [title, setTitle] = useState(initialData?.title || '');
-  const [questions, setQuestions] = useState<Question[]>(initialData?.questions || []);
+  const [questions, setQuestions] = useState<Question[]>(
+    initialData?.questions || [{ text: '', type: 'open_ended' }]  // Default question when no initialData
+  );
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
