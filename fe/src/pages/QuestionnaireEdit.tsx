@@ -85,6 +85,8 @@ const QuestionnaireEdit: React.FC = () => {
     questions: questionnaire.questions
   } : undefined;
 
+  const isNewQuestionnaire = !id || id === 'new' || !questionnaire;
+
   return (
     <Box>
       <QuestionnaireForm
@@ -109,6 +111,8 @@ const QuestionnaireEdit: React.FC = () => {
           variant="contained"
           color="primary"
           onClick={handleStart}
+          disabled={isNewQuestionnaire}
+          sx={{ opacity: isNewQuestionnaire ? 0.6 : 1 }}
         >
           Start Questionnaire
         </Button>
