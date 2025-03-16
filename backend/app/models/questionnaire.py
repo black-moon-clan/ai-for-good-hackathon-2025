@@ -12,17 +12,16 @@ load_dotenv()
 
 # MongoDB connection setup
 MONGODB_URI = os.getenv('MONGODB_URI', 'mongodb://localhost:27017')
-
-# In-memory fallback storage
-questionnaires = []  # Add this line to export the fallback storage
+DB_NAME = os.getenv('DB_NAME', 'questionnaire_db')
 
 try:
     client = MongoClient(MONGODB_URI)
-    db = client['questionnaire_db']
+    db = client[DB_NAME]
     questionnaire_collection = db['questionnaires']
-    print("Successfully connected to MongoDB")
+    print(f"Successfully connected to MongoDB: {DB_NAME}")
 except Exception as e:
-    print(f"Warning: Could not connect to MongoDB. Using in-memory store instead. Error: {e}")
+    print(f"Error connecting to MongoDB: {e}")
+    raise e
 
 class QuestionnaireStatus(str, Enum):
     NOT_STARTED = "Not Started"
@@ -32,7 +31,7 @@ class QuestionnaireStatus(str, Enum):
 
 class QuestionBase(BaseModel):
     text: str
-    type: str  # "rating" or "open_ended"
+    type: str
     options: Optional[List[str]] = []
 
 class Questionnaire(BaseModel):
@@ -43,6 +42,7 @@ class Questionnaire(BaseModel):
     status: QuestionnaireStatus = QuestionnaireStatus.NOT_STARTED
 
     def to_mongo(self):
+        """Convert to MongoDB document"""
         return {
             "_id": ObjectId(self.id) if not isinstance(self.id, ObjectId) else self.id,
             "title": self.title,
@@ -53,6 +53,7 @@ class Questionnaire(BaseModel):
 
     @classmethod
     def from_mongo(cls, data):
+        """Create instance from MongoDB document"""
         if data:
             data['id'] = str(data.pop('_id'))
             return cls(**data)

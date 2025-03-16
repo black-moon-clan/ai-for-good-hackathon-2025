@@ -13,23 +13,17 @@ class QuestionnaireService:
         """
         Generate Python code for a questionnaire flow and save it to a file.
         """
-        # Find the questionnaire by ID using MongoDB
         try:
             questionnaire_doc = questionnaire_collection.find_one({"_id": ObjectId(questionnaire_id)})
             if not questionnaire_doc:
                 return None
             
-            # Convert MongoDB document to Questionnaire object
             questionnaire = Questionnaire.from_mongo(questionnaire_doc)
-            
-            # Generate Python code for the questionnaire flow
             python_code = QuestionnaireService._generate_flow_code(questionnaire.dict())
             
-            # Create directory if it doesn't exist
             flows_dir = Path("flows")
             flows_dir.mkdir(exist_ok=True)
             
-            # Save the code to a file
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             questionnaire_name = questionnaire.title.replace(' ', '_').lower()
             

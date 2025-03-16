@@ -81,6 +81,11 @@ const QuestionnaireList: React.FC = () => {
     navigate(`/questionnaire/${questionnaire.id}`);
   };
 
+  const handleDeleteClick = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    setDeleteConfirmId(id);
+  };
+
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" m={4}>
@@ -168,15 +173,15 @@ const QuestionnaireList: React.FC = () => {
                     </List>
                   </Box>
                 </CardContent>
-                <CardActions>
+                <CardActions onClick={(e) => e.stopPropagation()}>
                   <IconButton 
-                    onClick={() => setEditingQuestionnaire(questionnaire)}
+                    onClick={(e) => handleEditClick(questionnaire)}
                     color="primary"
                   >
                     <EditIcon />
                   </IconButton>
                   <IconButton 
-                    onClick={() => setDeleteConfirmId(questionnaire.id)}
+                    onClick={(e) => handleDeleteClick(e, questionnaire.id)}
                     color="error"
                   >
                     <DeleteIcon />
@@ -213,13 +218,16 @@ const QuestionnaireList: React.FC = () => {
       >
         <DialogTitle>Confirm Delete</DialogTitle>
         <DialogContent>
-          Are you sure you want to delete this questionnaire?
+          <Typography>
+            Are you sure you want to delete this questionnaire?
+          </Typography>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDeleteConfirmId(null)}>Cancel</Button>
           <Button 
             onClick={() => deleteConfirmId && handleDelete(deleteConfirmId)} 
             color="error"
+            variant="contained"
           >
             Delete
           </Button>
