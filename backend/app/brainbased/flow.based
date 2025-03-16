@@ -14,8 +14,6 @@ until "User has provided full name":
         example={"full_name": "John Doe"}
     )
 
-
-
 loop:
     confirmation_response = talk("Thank you. Before we begin, I’ll ask a few questions about your experience in the English program. Just answer naturally, and I’ll take care of the rest! Does that sound good?", True, {"confirmation": "Yes"})
 until "User responds with yes":
@@ -33,4 +31,5 @@ loop:
 until "User has provided a rating between 1 to 5":
     q2_rating = q2_response.ask(question="Based on the user's response, what rating would you give from 1 to 5?",example={"rating": 4})
 state["confidence_rating"] = q2_rating["rating"]
+
 res = say("Thank you very much for taking the time to provide your feedback. Your input will help us improve the English program at RIT. Have a great day!")
