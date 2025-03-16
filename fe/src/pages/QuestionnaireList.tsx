@@ -7,8 +7,20 @@ import {
   List,
   ListItem,
   Alert,
-  CircularProgress
+  CircularProgress,
+  IconButton,
+  CardActions,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button
 } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import QuestionnaireForm from './QuestionnaireForm';
+import { useNavigate } from 'react-router-dom';
+import AddIcon from '@mui/icons-material/Add';
 
 interface Question {
   text: string;
@@ -17,6 +29,7 @@ interface Question {
 }
 
 interface Questionnaire {
+  id: string;
   title: string;
   questions: Question[];
   created_at: string;
@@ -26,25 +39,48 @@ const QuestionnaireList: React.FC = () => {
   const [questionnaires, setQuestionnaires] = useState<Questionnaire[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [editingQuestionnaire, setEditingQuestionnaire] = useState<Questionnaire | null>(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const navigate = useNavigate();
+
+  const fetchQuestionnaires = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/questionnaires/');
+      if (!response.ok) throw new Error('Failed to fetch questionnaires');
+      const data = await response.json();
+      setQuestionnaires(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load questionnaires');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchQuestionnaires = async () => {
-      try {
-        const response = await fetch('http://localhost:5000/api/questionnaires/');
-        if (!response.ok) {
-          throw new Error('Failed to fetch questionnaires');
-        }
-        const data = await response.json();
-        setQuestionnaires(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load questionnaires');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchQuestionnaires();
   }, []);
+
+  const handleDelete = async (id: string) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/questionnaires/${id}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) throw new Error('Failed to delete questionnaire');
+      await fetchQuestionnaires();
+      setDeleteConfirmId(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete questionnaire');
+    }
+  };
+
+  const handleEditComplete = () => {
+    setEditingQuestionnaire(null);
+    fetchQuestionnaires();
+  };
+
+  const handleEditClick = (questionnaire: Questionnaire) => {
+    navigate(`/questionnaire/${questionnaire.id}`);
+  };
 
   if (loading) {
     return (
@@ -64,16 +100,30 @@ const QuestionnaireList: React.FC = () => {
 
   return (
     <Box sx={{ maxWidth: 800, mx: 'auto', p: 3 }}>
-      <Typography variant="h4" gutterBottom>
-        Questionnaires
-      </Typography>
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+        <Typography variant="h4">
+          Questionnaires
+        </Typography>
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={() => navigate('/questionnaire/new')}
+        >
+          Create Questionnaire
+        </Button>
+      </Box>
       
       {questionnaires.length === 0 ? (
         <Alert severity="info">No questionnaires available</Alert>
       ) : (
         <List>
-          {questionnaires.map((questionnaire, index) => (
-            <ListItem key={index} sx={{ mb: 2, px: 0 }}>
+          {questionnaires.map((questionnaire) => (
+            <ListItem 
+              key={questionnaire.id} 
+              sx={{ mb: 2, px: 0 }}
+              onClick={() => handleEditClick(questionnaire)}
+              style={{ cursor: 'pointer' }}
+            >
               <Card sx={{ width: '100%' }}>
                 <CardContent>
                   <Typography variant="h6" gutterBottom>
@@ -100,11 +150,63 @@ const QuestionnaireList: React.FC = () => {
                     </List>
                   </Box>
                 </CardContent>
+                <CardActions>
+                  <IconButton 
+                    onClick={() => setEditingQuestionnaire(questionnaire)}
+                    color="primary"
+                  >
+                    <EditIcon />
+                  </IconButton>
+                  <IconButton 
+                    onClick={() => setDeleteConfirmId(questionnaire.id)}
+                    color="error"
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </CardActions>
               </Card>
             </ListItem>
           ))}
         </List>
       )}
+
+      {/* Edit Dialog */}
+      <Dialog 
+        open={!!editingQuestionnaire} 
+        onClose={() => setEditingQuestionnaire(null)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>Edit Questionnaire</DialogTitle>
+        <DialogContent>
+          {editingQuestionnaire && (
+            <QuestionnaireForm
+              initialData={editingQuestionnaire}
+              onComplete={handleEditComplete}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={!!deleteConfirmId}
+        onClose={() => setDeleteConfirmId(null)}
+      >
+        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogContent>
+          Are you sure you want to delete this questionnaire?
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteConfirmId(null)}>Cancel</Button>
+          <Button 
+            onClick={() => deleteConfirmId && handleDelete(deleteConfirmId)} 
+            color="error"
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

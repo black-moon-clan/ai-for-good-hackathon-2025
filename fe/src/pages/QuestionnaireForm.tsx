@@ -15,9 +15,21 @@ interface Question {
   options?: string[];
 }
 
-const QuestionnaireForm: React.FC = () => {
-  const [title, setTitle] = useState('');
-  const [questions, setQuestions] = useState<Question[]>([]);
+interface QuestionnaireFormProps {
+  initialData?: {
+    id: string;
+    title: string;
+    questions: Question[];
+  } | undefined;
+  onComplete?: () => void;
+}
+
+const QuestionnaireForm: React.FC<QuestionnaireFormProps> = ({ 
+  initialData,
+  onComplete 
+}) => {
+  const [title, setTitle] = useState(initialData?.title || '');
+  const [questions, setQuestions] = useState<Question[]>(initialData?.questions || []);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
@@ -57,8 +69,12 @@ const QuestionnaireForm: React.FC = () => {
     }
 
     try {
-      const response = await fetch('http://localhost:5000/api/questionnaires/', {
-        method: 'POST',
+      const url = initialData
+        ? `http://localhost:5000/api/questionnaires/${initialData.id}`
+        : 'http://localhost:5000/api/questionnaires/';
+      
+      const response = await fetch(url, {
+        method: initialData ? 'PUT' : 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -70,12 +86,15 @@ const QuestionnaireForm: React.FC = () => {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create questionnaire');
+        throw new Error('Failed to save questionnaire');
       }
 
       setSuccess(true);
-      setTitle('');
-      setQuestions([]);
+      if (!initialData) {
+        setTitle('');
+        setQuestions([]);
+      }
+      onComplete?.();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     }
@@ -84,7 +103,7 @@ const QuestionnaireForm: React.FC = () => {
   return (
     <Box component="form" onSubmit={handleSubmit} sx={{ maxWidth: 800, mx: 'auto', p: 3 }}>
       <Typography variant="h4" gutterBottom>
-        Create Questionnaire
+        {initialData ? 'Edit Questionnaire' : 'Create Questionnaire'}
       </Typography>
 
       <TextField
