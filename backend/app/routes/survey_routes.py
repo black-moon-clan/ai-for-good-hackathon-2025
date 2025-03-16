@@ -7,5 +7,6 @@ survey_bp = Blueprint('survey', __name__)
 def create_task():
     print("Creating survey answer")
     survey_data = request.json
+    print(survey_data)
     survey = SurveyService.create_survey(survey_data)
     return jsonify(survey), 201

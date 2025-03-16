@@ -19,7 +19,7 @@ class SurveyService:
         now = datetime.now() # current date and time
 
         data_to_append = [
-            [now.strftime("%m/%d/%Y %H:%M:%S"), survey_data['firstName'], survey_data['lastName'], survey_data['improved_english_rating'], survey_data['confidence_rating']]
+            [now.strftime("%m/%d/%Y %H:%M:%S"), survey_data["user_info"]['firstName'], survey_data["user_info"]['lastName'], survey_data['english_improved_rating'], survey_data['confidence_rating'], survey_data['improvement_suggestions']]
         ]
     
         SurveyService._append_data_to_google_sheets(data_to_append)
