@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 from datetime import datetime
+import uuid
 
 questionnaire_bp = Blueprint('questionnaire', __name__)
 
@@ -10,7 +11,7 @@ questionnaires = []
 def create_questionnaire():
     try:
         data = request.get_json()
-        data['id'] = str(len(questionnaires) + 1)  # Simple ID generation
+        data['id'] = str(uuid.uuid4())  # Generate UUID
         data['created_at'] = datetime.now().isoformat()
         questionnaires.append(data)
         return jsonify(data), 201

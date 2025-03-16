@@ -20,7 +20,7 @@ interface QuestionnaireFormProps {
     id: string;
     title: string;
     questions: Question[];
-  } | undefined;
+  };
   onComplete?: () => void;
 }
 
@@ -81,7 +81,6 @@ const QuestionnaireForm: React.FC<QuestionnaireFormProps> = ({
         body: JSON.stringify({
           title,
           questions,
-          created_at: new Date().toISOString(),
         }),
       });
 
@@ -89,6 +88,7 @@ const QuestionnaireForm: React.FC<QuestionnaireFormProps> = ({
         throw new Error('Failed to save questionnaire');
       }
 
+      const savedQuestionnaire = await response.json();
       setSuccess(true);
       if (!initialData) {
         setTitle('');

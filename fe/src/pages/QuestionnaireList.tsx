@@ -66,7 +66,7 @@ const QuestionnaireList: React.FC = () => {
         method: 'DELETE',
       });
       if (!response.ok) throw new Error('Failed to delete questionnaire');
-      await fetchQuestionnaires();
+      setQuestionnaires(questionnaires.filter(q => q.id !== id));
       setDeleteConfirmId(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to delete questionnaire');
