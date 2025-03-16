@@ -27,7 +27,8 @@ flow = bb.workers.flows.create(
     worker_id=worker.id,
     name="Shift Booker",
     path="./shift_booker/shift_booker.based",
-    label="v1"
+    label="v1",
+    validate=False
 )
 
 voice_deployment = bb.workers.deployments.voice.create(
