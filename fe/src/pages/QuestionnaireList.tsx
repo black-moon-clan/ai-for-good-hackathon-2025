@@ -21,6 +21,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import QuestionnaireForm from './QuestionnaireForm';
 import { useNavigate } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
+import { apiRequest, api } from '../utils/api';
 
 interface Question {
   text: string;
@@ -46,9 +47,7 @@ const QuestionnaireList: React.FC = () => {
 
   const fetchQuestionnaires = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/questionnaires/');
-      if (!response.ok) throw new Error('Failed to fetch questionnaires');
-      const data = await response.json();
+      const data = await apiRequest(api.endpoints.questionnaires);
       setQuestionnaires(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load questionnaires');
@@ -63,10 +62,9 @@ const QuestionnaireList: React.FC = () => {
 
   const handleDelete = async (id: string) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/questionnaires/${id}`, {
+      await apiRequest(`${api.endpoints.questionnaires}/${id}`, {
         method: 'DELETE',
       });
-      if (!response.ok) throw new Error('Failed to delete questionnaire');
       setQuestionnaires(questionnaires.filter(q => q.id !== id));
       setDeleteConfirmId(null);
     } catch (err) {

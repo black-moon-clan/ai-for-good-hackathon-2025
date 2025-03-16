@@ -8,6 +8,7 @@ import {
   Snackbar,
 } from '@mui/material';
 import QuestionItem from './QuestionItem';
+import { apiRequest, api } from '../utils/api';
 
 interface Question {
   text: string;
@@ -72,15 +73,12 @@ const QuestionnaireForm: React.FC<QuestionnaireFormProps> = ({
     }
 
     try {
-      const url = initialData
-        ? `http://localhost:5000/api/questionnaires/${initialData.id}`
-        : 'http://localhost:5000/api/questionnaires/';
+      const endpoint = initialData
+        ? `${api.endpoints.questionnaires}/${initialData.id}`
+        : api.endpoints.questionnaires;
       
-      const response = await fetch(url, {
+      const savedQuestionnaire = await apiRequest(endpoint, {
         method: initialData ? 'PUT' : 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({
           title,
           questions,
@@ -88,15 +86,10 @@ const QuestionnaireForm: React.FC<QuestionnaireFormProps> = ({
         }),
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to save questionnaire');
-      }
-
-      const savedQuestionnaire = await response.json();
       setSuccess(true);
       if (!initialData) {
         setTitle('');
-        setQuestions([]);
+        setQuestions([{ text: '', type: 'open_ended' }]);
       }
       onComplete?.();
     } catch (err) {

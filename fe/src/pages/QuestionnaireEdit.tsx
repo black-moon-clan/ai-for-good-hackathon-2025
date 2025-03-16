@@ -8,6 +8,7 @@ import {
   Alert,
 } from '@mui/material';
 import QuestionnaireForm from './QuestionnaireForm';
+import { apiRequest, api } from '../utils/api';
 
 interface Question {
   text: string;
@@ -36,9 +37,7 @@ const QuestionnaireEdit: React.FC = () => {
       
       setLoading(true);
       try {
-        const response = await fetch(`http://localhost:5000/api/questionnaires/${id}`);
-        if (!response.ok) throw new Error('Failed to fetch questionnaire');
-        const data = await response.json();
+        const data = await apiRequest(`${api.endpoints.questionnaires}/${id}`);
         setQuestionnaire(data);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
@@ -64,39 +63,19 @@ const QuestionnaireEdit: React.FC = () => {
     const newStatus = questionnaire.status === 'Running' ? 'Stopped' : 'Running';
     
     try {
-      // First update the status
-      const statusResponse = await fetch(`http://localhost:5000/api/questionnaires/${id}/status`, {
+      const statusData = await apiRequest(`${api.endpoints.questionnaires}/${id}/status`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({ status: newStatus }),
       });
 
-      if (!statusResponse.ok) {
-        throw new Error('Failed to update questionnaire status');
-      }
-
       if (newStatus === 'Running') {
-        // Call start_questionnaire endpoint when starting
-        const startResponse = await fetch(`http://localhost:5000/api/questionnaires/${id}/start`, {
+        const startData = await apiRequest(`${api.endpoints.questionnaires}/${id}/start`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
         });
-
-        if (!startResponse.ok) {
-          throw new Error('Failed to start questionnaire');
-        }
-
-        const startResult = await startResponse.json();
-        console.log('Questionnaire started:', startResult);
-        
+        console.log('Questionnaire started:', startData);
         navigate('/');
       } else {
-        const updatedQuestionnaire = await statusResponse.json();
-        setQuestionnaire(updatedQuestionnaire);
+        setQuestionnaire(statusData);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
