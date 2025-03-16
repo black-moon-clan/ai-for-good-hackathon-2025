@@ -8,8 +8,8 @@ def generate_uuid():
 
 class QuestionBase(BaseModel):
     text: str
-    type: str  # "multiple_choice" or "essay"
-    options: Optional[List[str]] = []  # For multiple choice questions
+    type: str  # "rating" or "open_ended"
+    options: Optional[List[str]] = []  # For rating questions
 
 class Questionnaire(BaseModel):
     id: str = Field(default_factory=generate_uuid)

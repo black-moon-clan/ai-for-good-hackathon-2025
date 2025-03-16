@@ -34,7 +34,7 @@ const QuestionnaireForm: React.FC<QuestionnaireFormProps> = ({
   const [success, setSuccess] = useState(false);
 
   const handleAddQuestion = () => {
-    setQuestions([...questions, { text: '', type: 'multiple_choice' }]);
+    setQuestions([...questions, { text: '', type: 'open_ended' }]);
   };
 
   const handleUpdateQuestion = (index: number, field: string, value: any) => {
