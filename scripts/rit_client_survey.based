@@ -1,0 +1,38 @@
+state = {}
+meta_prompt = "You're an assistant collecting feedback about the English program at RIT. "
+
+loop:
+    name_response = talk(f"{meta_prompt}. Thank the user for calling  RIT survey center.  Asks for the caller's first and last name",True)
+until "User has provided full name":
+    user_info = name_response.ask(
+        question="Extract the user's full name.",
+        example={"full_name": "John Doe"}
+    )
+
+state["user_info"] = user_info
+
+loop:
+    confirmation_response = talk("Thank you. For the following statements, please rate your agreement on a scale from 1 to 5 stars, where 1 star means 'Totally Disagree' and 5 stars means 'Totally Agree'. Please say yes to continue", True, {"confirmation": "Yes"})
+until "User says yes ":
+    answer = confirmation_response.ask(question="Based on the user's response, what rating did they give from 1 to 5?",example={"confirmation": "Yes"})
+
+loop:
+    q1_response = talk(" My English has improved because of this English class at RIT. ",True)
+until "User has provided a rating between 1 to 5":
+    q1_rating = q1_response.ask(question="Based on the user's response, what rating did they give from 1 to 5?",example={"rating": 4})
+
+state["english_improved_rating"] = q1_rating["rating"]
+
+loop:
+    q2_response = talk(" Thanks to attending this program, I feel more confident using English in my daily life. ",True)
+until "User has provided a rating between 1 to 5":
+    q2_rating = q2_response.ask(question="Based on the user's response, what rating did they give from 1 to 5?",example={"rating": 4})
+state["confidence_rating"] = q2_rating["rating"]
+
+loop:
+    q3_response = talk(f"{meta_prompt} What can RIT do to help you? Please share any suggestions or feedback.",True)
+until "user has provided some feebacks":
+    q3_answer = q3_response.ask(question="Extract the user's feedback about what RIT can do to help them.",example={"feedback": "I would like more conversation practice and evening classes."})
+state["improvement_suggestions"] = q3_answer["feedback"]
+
+res = say("Thank you very much for taking the time to provide your feedback. Your input will help us improve the English program at RIT. Have a great day!")

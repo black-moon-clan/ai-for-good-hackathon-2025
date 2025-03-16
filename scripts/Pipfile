@@ -1,0 +1,17 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[scripts]
+brainbase_deploy = "python3 brainbase_deploy.py"
+
+[packages]
+python-dotenv = "*"
+brainbase-labs = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.13"
+python_full_version = "3.13.2"
