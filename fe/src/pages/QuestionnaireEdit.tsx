@@ -8,6 +8,7 @@ import {
   Alert,
 } from '@mui/material';
 import QuestionnaireForm from './QuestionnaireForm';
+import { apiRequest, api } from '../utils/api';
 
 interface Question {
   text: string;
@@ -20,6 +21,7 @@ interface Questionnaire {
   title: string;
   questions: Question[];
   created_at: string;
+  status: 'Not Started' | 'Running' | 'Stopped' | 'Complete';
 }
 
 const QuestionnaireEdit: React.FC = () => {
@@ -35,9 +37,7 @@ const QuestionnaireEdit: React.FC = () => {
       
       setLoading(true);
       try {
-        const response = await fetch(`http://localhost:5000/api/questionnaires/${id}`);
-        if (!response.ok) throw new Error('Failed to fetch questionnaire');
-        const data = await response.json();
+        const data = await apiRequest(`${api.endpoints.questionnaires}/${id}`);
         setQuestionnaire(data);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
@@ -58,8 +58,28 @@ const QuestionnaireEdit: React.FC = () => {
   };
 
   const handleStart = async () => {
-    // Add your logic to start the questionnaire here
-    alert('Questionnaire started!');
+    if (!questionnaire) return;
+
+    const newStatus = questionnaire.status === 'Running' ? 'Stopped' : 'Running';
+    
+    try {
+      const statusData = await apiRequest(`${api.endpoints.questionnaires}/${id}/status`, {
+        method: 'PUT',
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (newStatus === 'Running') {
+        const startData = await apiRequest(`${api.endpoints.questionnaires}/${id}/start`, {
+          method: 'POST',
+        });
+        console.log('Questionnaire started:', startData);
+        navigate('/');
+      } else {
+        setQuestionnaire(statusData);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    }
   };
 
   if (loading) {
@@ -109,12 +129,14 @@ const QuestionnaireEdit: React.FC = () => {
         </Button>
         <Button
           variant="contained"
-          color="primary"
+          color={questionnaire?.status === 'Running' ? 'error' : 'primary'}
           onClick={handleStart}
           disabled={isNewQuestionnaire}
-          sx={{ opacity: isNewQuestionnaire ? 0.6 : 1 }}
+          sx={{ 
+            opacity: isNewQuestionnaire ? 0.6 : 1,
+          }}
         >
-          Start Questionnaire
+          {questionnaire?.status === 'Running' ? 'Stop Questionnaire' : 'Start Questionnaire'}
         </Button>
       </Stack>
     </Box>

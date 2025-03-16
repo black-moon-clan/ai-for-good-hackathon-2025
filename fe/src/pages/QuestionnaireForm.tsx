@@ -8,6 +8,7 @@ import {
   Snackbar,
 } from '@mui/material';
 import QuestionItem from './QuestionItem';
+import { apiRequest, api } from '../utils/api';
 
 interface Question {
   text: string;
@@ -20,6 +21,7 @@ interface QuestionnaireFormProps {
     id: string;
     title: string;
     questions: Question[];
+    status?: string;
   };
   onComplete?: () => void;
 }
@@ -29,12 +31,14 @@ const QuestionnaireForm: React.FC<QuestionnaireFormProps> = ({
   onComplete 
 }) => {
   const [title, setTitle] = useState(initialData?.title || '');
-  const [questions, setQuestions] = useState<Question[]>(initialData?.questions || []);
+  const [questions, setQuestions] = useState<Question[]>(
+    initialData?.questions || [{ text: '', type: 'open_ended' }]  // Default question when no initialData
+  );
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
   const handleAddQuestion = () => {
-    setQuestions([...questions, { text: '', type: 'multiple_choice' }]);
+    setQuestions([...questions, { text: '', type: 'open_ended' }]);
   };
 
   const handleUpdateQuestion = (index: number, field: string, value: any) => {
@@ -69,30 +73,23 @@ const QuestionnaireForm: React.FC<QuestionnaireFormProps> = ({
     }
 
     try {
-      const url = initialData
-        ? `http://localhost:5000/api/questionnaires/${initialData.id}`
-        : 'http://localhost:5000/api/questionnaires/';
+      const endpoint = initialData
+        ? `${api.endpoints.questionnaires}/${initialData.id}`
+        : api.endpoints.questionnaires;
       
-      const response = await fetch(url, {
+      const savedQuestionnaire = await apiRequest(endpoint, {
         method: initialData ? 'PUT' : 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({
           title,
           questions,
+          status: initialData?.status || 'Not Started',
         }),
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to save questionnaire');
-      }
-
-      const savedQuestionnaire = await response.json();
       setSuccess(true);
       if (!initialData) {
         setTitle('');
-        setQuestions([]);
+        setQuestions([{ text: '', type: 'open_ended' }]);
       }
       onComplete?.();
     } catch (err) {

@@ -21,6 +21,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import QuestionnaireForm from './QuestionnaireForm';
 import { useNavigate } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
+import { apiRequest, api } from '../utils/api';
 
 interface Question {
   text: string;
@@ -33,6 +34,7 @@ interface Questionnaire {
   title: string;
   questions: Question[];
   created_at: string;
+  status: 'Not Started' | 'Running' | 'Stopped' | 'Complete';
 }
 
 const QuestionnaireList: React.FC = () => {
@@ -45,9 +47,7 @@ const QuestionnaireList: React.FC = () => {
 
   const fetchQuestionnaires = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/questionnaires/');
-      if (!response.ok) throw new Error('Failed to fetch questionnaires');
-      const data = await response.json();
+      const data = await apiRequest(api.endpoints.questionnaires);
       setQuestionnaires(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load questionnaires');
@@ -62,10 +62,9 @@ const QuestionnaireList: React.FC = () => {
 
   const handleDelete = async (id: string) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/questionnaires/${id}`, {
+      await apiRequest(`${api.endpoints.questionnaires}/${id}`, {
         method: 'DELETE',
       });
-      if (!response.ok) throw new Error('Failed to delete questionnaire');
       setQuestionnaires(questionnaires.filter(q => q.id !== id));
       setDeleteConfirmId(null);
     } catch (err) {
@@ -80,6 +79,11 @@ const QuestionnaireList: React.FC = () => {
 
   const handleEditClick = (questionnaire: Questionnaire) => {
     navigate(`/questionnaire/${questionnaire.id}`);
+  };
+
+  const handleDeleteClick = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    setDeleteConfirmId(id);
   };
 
   if (loading) {
@@ -129,9 +133,28 @@ const QuestionnaireList: React.FC = () => {
                   <Typography variant="h6" gutterBottom>
                     {questionnaire.title}
                   </Typography>
-                  <Typography color="text.secondary" gutterBottom>
-                    Created: {new Date(questionnaire.created_at).toLocaleDateString()}
-                  </Typography>
+                  <Box display="flex" justifyContent="space-between" alignItems="center">
+                    <Typography color="text.secondary" gutterBottom>
+                      Created: {new Date(questionnaire.created_at).toLocaleDateString()}
+                    </Typography>
+                    <Typography
+                      sx={{
+                        px: 2,
+                        py: 0.5,
+                        borderRadius: 1,
+                        backgroundColor: (() => {
+                          switch (questionnaire.status) {
+                            case 'Running': return 'success.light';
+                            case 'Stopped': return 'warning.light';
+                            case 'Complete': return 'info.light';
+                            default: return 'grey.200';
+                          }
+                        })(),
+                      }}
+                    >
+                      {questionnaire.status}
+                    </Typography>
+                  </Box>
                   <Typography variant="body2">
                     Number of questions: {questionnaire.questions.length}
                   </Typography>
@@ -150,15 +173,15 @@ const QuestionnaireList: React.FC = () => {
                     </List>
                   </Box>
                 </CardContent>
-                <CardActions>
+                <CardActions onClick={(e) => e.stopPropagation()}>
                   <IconButton 
-                    onClick={() => setEditingQuestionnaire(questionnaire)}
+                    onClick={(e) => handleEditClick(questionnaire)}
                     color="primary"
                   >
                     <EditIcon />
                   </IconButton>
                   <IconButton 
-                    onClick={() => setDeleteConfirmId(questionnaire.id)}
+                    onClick={(e) => handleDeleteClick(e, questionnaire.id)}
                     color="error"
                   >
                     <DeleteIcon />
@@ -195,13 +218,16 @@ const QuestionnaireList: React.FC = () => {
       >
         <DialogTitle>Confirm Delete</DialogTitle>
         <DialogContent>
-          Are you sure you want to delete this questionnaire?
+          <Typography>
+            Are you sure you want to delete this questionnaire?
+          </Typography>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDeleteConfirmId(null)}>Cancel</Button>
           <Button 
             onClick={() => deleteConfirmId && handleDelete(deleteConfirmId)} 
             color="error"
+            variant="contained"
           >
             Delete
           </Button>
