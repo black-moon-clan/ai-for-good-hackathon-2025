@@ -18,8 +18,30 @@ class SurveyService:
     def create_survey(survey_data):
         now = datetime.now() # current date and time
 
+        firstName = ''
+        lastName = ''
+        language = 'english'
+        englishImprovedRating = ''
+        confidenceRating = ''
+        improvementSuggestions = ''
+        estimatedEnglish = 'intermediate'
+        if 'user_info' in survey_data.keys():
+            if 'first_name' in survey_data["user_info"].keys():
+                firstName = survey_data["user_info"]['first_name']
+            if 'last_name' in survey_data["user_info"].keys():
+                lastName = survey_data["user_info"]['last_name']
+        
+        if 'english_improved_rating' in survey_data.keys():
+            englishImprovedRating = survey_data['english_improved_rating']
+
+        if 'confidence_rating' in survey_data.keys():
+            confidenceRating = survey_data['confidence_rating']
+
+        if 'improvement_suggestions' in survey_data.keys():
+            improvementSuggestions = survey_data['improvement_suggestions']
+
         data_to_append = [
-            [now.strftime("%m/%d/%Y %H:%M:%S"), survey_data["user_info"]['firstName'], survey_data["user_info"]['lastName'], survey_data['english_improved_rating'], survey_data['confidence_rating'], survey_data['improvement_suggestions']]
+            [now.strftime("%m/%d/%Y %H:%M:%S"), firstName, lastName, language, englishImprovedRating, confidenceRating, improvementSuggestions, estimatedEnglish]
         ]
     
         SurveyService._append_data_to_google_sheets(data_to_append)
