@@ -10,8 +10,8 @@ loop:
     
 until "User has provided full name":
     user_info = name_response.ask(
-        question="Extract the user's full name.",
-        example={"full_name": "John Doe"}
+        question="Extract the user's first name and last name",
+        example={"first_name": "John","last_name":"Doe"}
     )
 
 loop:
