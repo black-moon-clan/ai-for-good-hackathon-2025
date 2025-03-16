@@ -4,6 +4,8 @@ import uuid
 import os
 import json
 from pathlib import Path
+from bson import ObjectId
+from app.models.questionnaire import questionnaire_collection, Questionnaire
 
 class QuestionnaireService:
     @staticmethod
@@ -11,37 +13,41 @@ class QuestionnaireService:
         """
         Generate Python code for a questionnaire flow and save it to a file.
         """
-        # Find the questionnaire by ID
-        from app.routes.questionnaire_routes import questionnaires
-        questionnaire = next((q for q in questionnaires if q['id'] == questionnaire_id), None)
-        
-        if not questionnaire:
+        # Find the questionnaire by ID using MongoDB
+        try:
+            questionnaire_doc = questionnaire_collection.find_one({"_id": ObjectId(questionnaire_id)})
+            if not questionnaire_doc:
+                return None
+            
+            # Convert MongoDB document to Questionnaire object
+            questionnaire = Questionnaire.from_mongo(questionnaire_doc)
+            
+            # Generate Python code for the questionnaire flow
+            python_code = QuestionnaireService._generate_flow_code(questionnaire.dict())
+            
+            # Create directory if it doesn't exist
+            flows_dir = Path("flows")
+            flows_dir.mkdir(exist_ok=True)
+            
+            # Save the code to a file
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            questionnaire_name = questionnaire.title.replace(' ', '_').lower()
+            
+            filename = f"{questionnaire_name}_{timestamp}_flow.based"
+            file_path = flows_dir / filename
+            
+            with open(file_path, 'w') as f:
+                f.write(python_code)
+            
+            return {
+                "questionnaire_id": questionnaire_id,
+                "file_path": str(file_path),
+                "status": "success",
+                "message": "Questionnaire flow generated successfully"
+            }
+        except Exception as e:
+            print(f"Error in start_questionnaire: {str(e)}")
             return None
-        
-        # Generate Python code for the questionnaire flow
-        python_code = QuestionnaireService._generate_flow_code(questionnaire)
-        
-        # Create directory if it doesn't exist
-        flows_dir = Path("flows")
-        flows_dir.mkdir(exist_ok=True)
-        
-        # Save the code to a file
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        questionnaire_name = questionnaire.get('name', 'questionnaire').replace(' ', '_').lower()
-        questionnaire_description= questionnaire.get('description', 'questionnaire').replace(' ', '_').lower()
-
-        filename = f"{questionnaire_name}_{timestamp}_flow.based"
-        file_path = flows_dir / filename
-        
-        with open(file_path, 'w') as f:
-            f.write(python_code)
-        
-        return {
-            "questionnaire_id": questionnaire_id,
-            "file_path": str(file_path),
-            "status": "success",
-            "message": "Questionnaire flow generated successfully"
-        }
     
     @staticmethod
     def _generate_flow_code(questionnaire):
@@ -53,7 +59,7 @@ class QuestionnaireService:
         # Start with basic setup
         lines = []
         lines.append("state = {}")
-        lines.append(f"meta_prompt = f\"{{questionnaire_description}}\"")
+        lines.append(f"meta_prompt = f\"Questionnaire: {questionnaire.get('title', '')}\"")
         lines.append("")
         
         # Process each question
@@ -92,18 +98,19 @@ class QuestionnaireService:
         """
         Submit answers for a questionnaire.
         """
-        # Find the questionnaire by ID
-        from app.routes.questionnaire_routes import questionnaires
-        questionnaire = next((q for q in questionnaires if q['id'] == questionnaire_id), None)
-        
-        if not questionnaire:
-            return None
-        
-        # In a real application, you might store the answers in a database
-        # For this example, we'll just return a success message
-        
-        return {
-            "questionnaire_id": questionnaire_id,
-            "status": "success",
-            "message": "Questionnaire submitted successfully"
-        } 
+        try:
+            # Find the questionnaire by ID using MongoDB
+            questionnaire_doc = questionnaire_collection.find_one({"_id": ObjectId(questionnaire_id)})
+            if not questionnaire_doc:
+                return None
+            
+            # In a real application, you might store the answers in a database
+            # For this example, we'll just return a success message
+            return {
+                "questionnaire_id": questionnaire_id,
+                "status": "success",
+                "message": "Questionnaire submitted successfully"
+            }
+        except Exception as e:
+            print(f"Error in submit_questionnaire: {str(e)}")
+            return None 
