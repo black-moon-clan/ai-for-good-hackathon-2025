@@ -179,5 +179,6 @@ fe/build/
 fe/dist/
 fe/coverage/
 
+**/.DS_Store
 # backend
 backend/config
