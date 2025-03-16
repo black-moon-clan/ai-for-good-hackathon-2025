@@ -18,6 +18,8 @@ except ImportError:
     GOOGLE_APIS_AVAILABLE = False
     print("Google API libraries not available. Some features will be limited.")
 
+SERVICE_ACCOUNT_FILE = "config/service_account.json"
+
 class TaskService:
     @staticmethod
     def get_all_tasks():
@@ -158,8 +160,8 @@ class TaskService:
             return []
             
         # Parse Google credentials
-        credentials_info = json.loads(task.google_credentials)
-        credentials = service_account.Credentials.from_service_account_info(
+        credentials_info = SERVICE_ACCOUNT_FILE
+        credentials = service_account.Credentials.from_service_account_file(
             credentials_info,
             scopes=['https://www.googleapis.com/auth/drive.readonly']
         )
@@ -169,7 +171,7 @@ class TaskService:
         
         # List files in the specified folder
         results = drive_service.files().list(
-            q=f"'{task.source_path}' in parents and mimeType contains 'image/'",
+            q=f"'{task.source_path}' in parents and mimeType contains 'application/pdf'",
             fields="files(id, name, mimeType)"
         ).execute()
         
