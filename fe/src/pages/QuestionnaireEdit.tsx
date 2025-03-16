@@ -64,7 +64,8 @@ const QuestionnaireEdit: React.FC = () => {
     const newStatus = questionnaire.status === 'Running' ? 'Stopped' : 'Running';
     
     try {
-      const response = await fetch(`http://localhost:5000/api/questionnaires/${id}/status`, {
+      // First update the status
+      const statusResponse = await fetch(`http://localhost:5000/api/questionnaires/${id}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -72,14 +73,29 @@ const QuestionnaireEdit: React.FC = () => {
         body: JSON.stringify({ status: newStatus }),
       });
 
-      if (!response.ok) {
+      if (!statusResponse.ok) {
         throw new Error('Failed to update questionnaire status');
       }
 
       if (newStatus === 'Running') {
+        // Call start_questionnaire endpoint when starting
+        const startResponse = await fetch(`http://localhost:5000/api/questionnaires/${id}/start`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!startResponse.ok) {
+          throw new Error('Failed to start questionnaire');
+        }
+
+        const startResult = await startResponse.json();
+        console.log('Questionnaire started:', startResult);
+        
         navigate('/');
       } else {
-        const updatedQuestionnaire = await response.json();
+        const updatedQuestionnaire = await statusResponse.json();
         setQuestionnaire(updatedQuestionnaire);
       }
     } catch (err) {

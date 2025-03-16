@@ -99,7 +99,8 @@ def update_status(questionnaire_id):
             return jsonify(questionnaires[index]), 200
         return jsonify({"error": "Questionnaire not found"}), 404
     except Exception as e:
-        return jsonify({"error": str(e)}), 400 
+        return jsonify({"error": str(e)}), 400
+
 @questionnaire_bp.route('/<questionnaire_id>/start', methods=['POST', 'OPTIONS'])
 def start_questionnaire(questionnaire_id):
     # Handle OPTIONS request for CORS preflight

@@ -1,0 +1,13 @@
+state = {}
+meta_prompt = f"{questionnaire_description}"
+
+loop:
+    q1_response = talk("What is your name?", True)
+until "User has provided an answer":
+    q1_answer = _response.ask(
+        question="What is the user's response ?",
+        example={"message": "User response"}
+    )
+state["q1"] = q1_answer["message"]
+
+talk("Thank you for completing the questionnaire. Your responses have been recorded.")
