@@ -179,3 +179,5 @@ fe/build/
 fe/dist/
 fe/coverage/
 
+# backend
+backend/config
