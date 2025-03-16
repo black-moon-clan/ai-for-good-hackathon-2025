@@ -34,8 +34,8 @@ const QuestionItem: React.FC<QuestionItemProps> = ({
           onChange={(e) => onUpdate(index, 'type', e.target.value)}
           sx={{ minWidth: 200 }}
         >
-          <MenuItem value="multiple_choice">Multiple Choice</MenuItem>
-          <MenuItem value="essay">Essay</MenuItem>
+          <MenuItem value="rating">Rating</MenuItem>
+          <MenuItem value="open_ended">Open Ended</MenuItem>
         </Select>
         <IconButton onClick={() => onDelete(index)} color="error">
           <DeleteIcon />

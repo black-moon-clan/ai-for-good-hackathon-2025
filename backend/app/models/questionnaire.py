@@ -4,7 +4,7 @@ from pydantic import BaseModel
 
 class QuestionBase(BaseModel):
     text: str
-    type: str  # "multiple_choice" or "essay"
+    type: str  # "rating" or "open_ended"
     options: Optional[List[str]] = []  # For multiple choice questions
 
 class Questionnaire(BaseModel):
