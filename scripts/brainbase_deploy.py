@@ -44,6 +44,6 @@ voice_deployment = brainbase_client.workers.deployments.voice.create(
 )
 
 if voice_deployment:
-    print(f"Successfully deployed {os.getenv("BRAINBASE_VOICE_DEPLOYMENT_NAME")} to {voice_deployment.phone_number}")
+    print(f"Successfully deployed {voice_deployment.name} to {voice_deployment.phone_number}")
 else:
-    print(f"Failed to deploy {BRAINBASE_VOICE_DEPLOYMENT_NAME}")
+    print(f"Failed to deploy {voice_deployment.name}")
